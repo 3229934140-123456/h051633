@@ -1,0 +1,23 @@
+print("=== Memory Limit Test ===");
+print("Creating uncollectable object chain (GC cannot free them)...");
+print("This will run until memory limit is hit.");
+print("");
+
+let count = 0;
+let root = {};
+let tail = root;
+
+while (true) {
+    let node = {};
+    node.val_a = 100;
+    node.val_b = 200;
+    node.val_c = 300;
+    node.name_str = "node_data_value";
+    tail.next = node;
+    tail = node;
+
+    count = count + 1;
+    if (count % 2000 == 0) {
+        print("  Allocated", count, "objects, still running...");
+    }
+}

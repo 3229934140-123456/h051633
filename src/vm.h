@@ -9,7 +9,7 @@
 #define MJ_FRAMES_MAX 64
 #define MJ_STACK_MAX  (MJ_FRAMES_MAX * 256)
 #define MJ_GC_HEAP_GROW_FACTOR 2
-#define MJ_GC_INITIAL_THRESHOLD (50 * 1024 * 1024)
+#define MJ_GC_INITIAL_THRESHOLD (2 * 1024 * 1024)
 
 typedef struct CallFrame {
     ObjClosure* closure;

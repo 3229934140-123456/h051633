@@ -245,6 +245,11 @@ static InterpretResult run(int target_frames) {
     } while (false)
 
     for (;;) {
+        // Check for pending errors (e.g., out of memory during allocation)
+        if (vm.error_message != NULL) {
+            return RESULT_OUT_OF_MEMORY;
+        }
+
         vm.execution_steps++;
         if (vm.max_execution_steps > 0 && vm.execution_steps >= vm.max_execution_steps) {
             vm_runtime_error("Execution timeout: too many steps.");
@@ -443,7 +448,9 @@ static InterpretResult run(int target_frames) {
             }
 
             case OP_NEW_TABLE: {
-                vm_push(OBJ_VAL(new_table()));
+                ObjTable* t = new_table();
+                if (t == NULL) return RESULT_OUT_OF_MEMORY;
+                vm_push(OBJ_VAL(t));
                 break;
             }
 

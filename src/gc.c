@@ -215,12 +215,13 @@ void* gc_reallocate(void* ptr, size_t old_size, size_t new_size) {
     if (vm.max_memory > 0 && new_size > old_size) {
         size_t delta = new_size - old_size;
         if (vm.bytes_allocated + delta > vm.max_memory) {
-            // Out of memory - set error state
+            // Out of memory - set error state and exit gracefully
             if (vm.error_message == NULL) {
-                vm.error_message = "Out of memory: allocation exceeds memory limit.";
+                vm.error_message = "allocation exceeds configured memory limit.";
                 vm.error_line = 0;
             }
-            return NULL;
+            fprintf(stderr, "Out of memory: %s\n", vm.error_message);
+            exit(71);
         }
     }
 
@@ -239,12 +240,13 @@ void* gc_reallocate(void* ptr, size_t old_size, size_t new_size) {
 
     void* result = realloc(ptr, new_size);
     if (result == NULL) {
-        // Allocation failed from system
+        // System allocation failed
         if (vm.error_message == NULL) {
-            vm.error_message = "Out of memory: system allocation failed.";
+            vm.error_message = "system memory allocation failed.";
             vm.error_line = 0;
         }
-        return NULL;
+        fprintf(stderr, "Out of memory: %s\n", vm.error_message);
+        exit(71);
     }
     return result;
 }

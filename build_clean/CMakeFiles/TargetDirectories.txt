@@ -1,0 +1,4 @@
+D:/trae-bz/TraeProjects/33/build_clean/CMakeFiles/moonjit.dir
+D:/trae-bz/TraeProjects/33/build_clean/CMakeFiles/host_demo.dir
+D:/trae-bz/TraeProjects/33/build_clean/CMakeFiles/edit_cache.dir
+D:/trae-bz/TraeProjects/33/build_clean/CMakeFiles/rebuild_cache.dir

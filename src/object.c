@@ -13,7 +13,7 @@
 
 static Obj* allocate_object(size_t size, ObjType type) {
     Obj* object = (Obj*)mj_reallocate(NULL, 0, size);
-    if (object == NULL) return NULL;
+    // mj_reallocate never returns NULL on failure (exits gracefully)
     object->type = type;
     object->is_marked = false;
     object->size = size;

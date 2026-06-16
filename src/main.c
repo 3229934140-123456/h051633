@@ -90,7 +90,8 @@ static void run_file(const char* path) {
                     vm.error_line);
             exit(70);
         case RESULT_OUT_OF_MEMORY:
-            fprintf(stderr, "Out of memory.\n");
+            fprintf(stderr, "Out of memory: %s\n",
+                    vm.error_message ? vm.error_message : "unknown reason");
             exit(71);
         case RESULT_STACK_OVERFLOW:
             fprintf(stderr, "Stack overflow.\n");
