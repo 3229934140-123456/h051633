@@ -107,13 +107,61 @@ int main(int argc, const char* argv[]) {
     vm.max_execution_steps = 10000000;
     vm.max_memory = 64 * 1024 * 1024;
 
-    if (argc == 1) {
+    const char* script_path = NULL;
+
+    // Parse arguments
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--version") == 0 || strcmp(argv[i], "-v") == 0) {
+            printf("moonjit %s\n", MJ_VERSION);
+            printf("A small, fast, embeddable scripting language\n");
+            exit(0);
+        }
+        if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
+            printf("Usage: moonjit [options] [script]\n");
+            printf("\n");
+            printf("Options:\n");
+            printf("  -h, --help              Show this help message\n");
+            printf("  -v, --version           Show version information\n");
+            printf("  --max-steps <N>         Maximum execution steps (default: 10,000,000)\n");
+            printf("  --max-memory <MB>       Maximum memory in MB (default: 64 MB)\n");
+            printf("  --no-gc                 Disable garbage collector (for debugging)\n");
+            printf("\n");
+            printf("If no script is given, enters interactive REPL mode.\n");
+            exit(0);
+        }
+        if (strcmp(argv[i], "--max-steps") == 0) {
+            if (i + 1 >= argc) {
+                fprintf(stderr, "Error: --max-steps requires a value\n");
+                exit(64);
+            }
+            vm.max_execution_steps = atoi(argv[i + 1]);
+            i++;
+            continue;
+        }
+        if (strcmp(argv[i], "--max-memory") == 0) {
+            if (i + 1 >= argc) {
+                fprintf(stderr, "Error: --max-memory requires a value\n");
+                exit(64);
+            }
+            int mb = atoi(argv[i + 1]);
+            vm.max_memory = (size_t)mb * 1024 * 1024;
+            i++;
+            continue;
+        }
+        if (strcmp(argv[i], "--no-gc") == 0) {
+            vm.gc_enabled = false;
+            continue;
+        }
+        // If not an option, it's the script path
+        if (argv[i][0] != '-' && script_path == NULL) {
+            script_path = argv[i];
+        }
+    }
+
+    if (script_path == NULL) {
         repl();
-    } else if (argc == 2) {
-        run_file(argv[1]);
     } else {
-        fprintf(stderr, "Usage: moonjit [path]\n");
-        exit(64);
+        run_file(script_path);
     }
 
     vm_free();

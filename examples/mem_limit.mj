@@ -1,0 +1,25 @@
+print("=== Memory Limit Test ===");
+print("Creating objects until memory limit is hit...");
+print("");
+
+let count = 0;
+let root = {};
+root.current = {};
+let last = root.current;
+
+while (true) {
+    // Create a chain of objects to prevent GC
+    let next = {};
+    next.a = 1;
+    next.b = 2;
+    next.c = 3;
+    next.d = 4;
+    next.e = 5;
+    last.next = next;
+    last = next;
+
+    count = count + 1;
+    if (count % 5000 == 0) {
+        print("  Created", count, "objects...");
+    }
+}

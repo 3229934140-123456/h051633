@@ -1,0 +1,20 @@
+print("=== GC Debug Test 3 - Exact Crash Point ===");
+print("");
+
+let n = 0;
+while (n < 500) {
+    print("n =", n);
+    let outer = {};
+    print("  outer created");
+    outer.inner = {};
+    print("  outer.inner set");
+    outer.inner.data = {};
+    print("  outer.inner.data set");
+    outer.inner.data.x = 42;
+    print("  outer.inner.data.x set to 42");
+    assert(outer.inner.data.x == 42);
+    print("  assert passed");
+    n = n + 1;
+    print("  loop iteration", n, "complete");
+}
+print("=== Test Complete ===");

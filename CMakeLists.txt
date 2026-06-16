@@ -1,19 +1,17 @@
 cmake_minimum_required(VERSION 3.10)
+
+# Skip compiler test when cross-compiling or using TCC
+set(CMAKE_C_COMPILER_WORKS 1)
+set(CMAKE_C_ABI_COMPILED 1)
+
 project(moonjit C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-if(MSVC)
-    add_compile_options(/W3)
-else()
-    add_compile_options(-Wall -Wextra -Wno-unused-parameter)
-endif()
-
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
-set(SOURCES
-    src/main.c
+set(LIB_SOURCES
     src/memory.c
     src/value.c
     src/object.c
@@ -26,8 +24,27 @@ set(SOURCES
     src/host.c
 )
 
-add_executable(moonjit ${SOURCES})
+set(MAIN_SOURCES
+    src/main.c
+    ${LIB_SOURCES}
+)
 
-if(NOT MSVC)
-    target_link_libraries(moonjit m)
-endif()
+add_executable(moonjit ${MAIN_SOURCES})
+
+# Host integration demo
+set(DEMO_SOURCES
+    examples/host_demo.c
+    ${LIB_SOURCES}
+)
+
+add_executable(host_demo ${DEMO_SOURCES})
+
+# Print summary
+add_custom_command(TARGET moonjit POST_BUILD
+    COMMAND echo "Built target: moonjit.exe"
+)
+add_custom_command(TARGET host_demo POST_BUILD
+    COMMAND echo "Built target: host_demo.exe"
+)
+
+

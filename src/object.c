@@ -17,16 +17,58 @@ static Obj* allocate_object(size_t size, ObjType type) {
     object->type = type;
     object->is_marked = false;
     object->size = size;
-    object->next = vm.objects;
-    vm.objects = object;
 
+    // Initialize based on type to ensure GC safety
+    switch (type) {
+        case OBJ_STRING:
+            break;
+        case OBJ_FUNCTION:
+            ((ObjFunction*)object)->name = NULL;
+            ((ObjFunction*)object)->arity = 0;
+            ((ObjFunction*)object)->upvalue_count = 0;
+            memset(&((ObjFunction*)object)->chunk, 0, sizeof(Chunk));
+            break;
+        case OBJ_CLOSURE:
+            ((ObjClosure*)object)->function = NULL;
+            ((ObjClosure*)object)->upvalues = NULL;
+            ((ObjClosure*)object)->upvalue_count = 0;
+            break;
+        case OBJ_UPVALUE:
+            ((ObjUpvalue*)object)->location = NULL;
+            ((ObjUpvalue*)object)->closed = NIL_VAL;
+            ((ObjUpvalue*)object)->next = NULL;
+            break;
+        case OBJ_NATIVE:
+            ((ObjNative*)object)->function = NULL;
+            ((ObjNative*)object)->arity = 0;
+            ((ObjNative*)object)->name = NULL;
+            break;
+        case OBJ_TABLE:
+            ((ObjTable*)object)->table.entries = NULL;
+            ((ObjTable*)object)->table.count = 0;
+            ((ObjTable*)object)->table.capacity = 0;
+            break;
+        case OBJ_USERDATA:
+            ((ObjUserdata*)object)->data = NULL;
+            ((ObjUserdata*)object)->size = 0;
+            ((ObjUserdata*)object)->finalizer = NULL;
+            break;
+    }
+
+    // GC check BEFORE adding to list - if GC runs now, object won't be in list
     if (vm.bytes_allocated > vm.next_gc && vm.gc_enabled) {
+        // Object is not in vm.objects yet, so GC won't see it
+        // Temporarily protect it
         gc_mark_object(object);
         Value temp = OBJ_VAL(object);
         vm_push(temp);
         gc_collect();
         vm_pop();
     }
+
+    // Now safe to add to list
+    object->next = vm.objects;
+    vm.objects = object;
 
     return object;
 }
@@ -46,7 +88,12 @@ static ObjString* allocate_string(char* chars, int length, u32 hash) {
     string->chars = chars;
     string->hash = hash;
 
+    // Protect string from GC while inserting into intern table
+    Value temp = OBJ_VAL(string);
+    vm_push(temp);
     table_set(&vm.strings, string, NIL_VAL);
+    vm_pop();
+
     return string;
 }
 
@@ -81,6 +128,10 @@ ObjFunction* new_function() {
 }
 
 ObjClosure* new_closure(ObjFunction* function) {
+    // Protect function from GC while allocating
+    Value fn_val = OBJ_VAL(function);
+    vm_push(fn_val);
+
     ObjUpvalue** upvalues = ALLOCATE(ObjUpvalue*, function->upvalue_count);
     for (int i = 0; i < function->upvalue_count; i++) {
         upvalues[i] = NULL;
@@ -90,6 +141,8 @@ ObjClosure* new_closure(ObjFunction* function) {
     closure->function = function;
     closure->upvalues = upvalues;
     closure->upvalue_count = function->upvalue_count;
+
+    vm_pop();
     return closure;
 }
 
@@ -119,7 +172,13 @@ ObjUserdata* new_userdata(size_t size, void (*finalizer)(void*)) {
     ObjUserdata* ud = ALLOCATE_OBJ(ObjUserdata, OBJ_USERDATA);
     ud->size = size;
     ud->finalizer = finalizer;
+
+    // Protect ud from GC while allocating data buffer
+    Value ud_val = OBJ_VAL(ud);
+    vm_push(ud_val);
     ud->data = ALLOCATE(u8, size);
+    vm_pop();
+
     memset(ud->data, 0, size);
     return ud;
 }

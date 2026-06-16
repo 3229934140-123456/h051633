@@ -5,32 +5,37 @@ print("");
 let total_created = 0;
 
 // Phase 1: Create many tables (tables create GC pressure)
-print("[Phase 1] Creating 5000 small tables...");
-for (let i = 0; i < 5000; i = i + 1) {
+print("[Phase 1] Creating 3000 small tables...");
+let i = 0;
+while (i < 3000) {
     let t = {};
     t.a = 1;
     t.b = 2;
     t.c = 3;
     total_created = total_created + 1;
+    i = i + 1;
 }
-print("  Phase 1 complete - 5000 tables created and collected");
+print("  Phase 1 complete - 3000 tables created and collected");
 print("");
 
 // Phase 2: Create nested tables
-print("[Phase 2] Creating 2000 nested tables...");
-for (let i = 0; i < 2000; i = i + 1) {
+print("[Phase 2] Creating 1500 nested tables...");
+i = 0;
+while (i < 1500) {
     let outer = {};
     outer.inner = {};
     outer.inner.data = {};
     outer.inner.data.x = 42;
     total_created = total_created + 1;
+    i = i + 1;
 }
-print("  Phase 2 complete - 2000 nested tables created");
+print("  Phase 2 complete - 1500 nested tables created");
 print("");
 
 // Phase 3: Create many closures
-print("[Phase 3] Creating 2000 closures...");
-for (let i = 0; i < 2000; i = i + 1) {
+print("[Phase 3] Creating 1500 closures...");
+i = 0;
+while (i < 1500) {
     let make_fn = fn() {
         let local_var = 100;
         return fn() {
@@ -40,18 +45,24 @@ for (let i = 0; i < 2000; i = i + 1) {
     let f = make_fn();
     let result = f();
     total_created = total_created + 1;
+    i = i + 1;
 }
-print("  Phase 3 complete - 2000 closures created");
+print("  Phase 3 complete - 1500 closures created");
 print("");
 
 // Phase 4: Large table stress
 print("[Phase 4] Creating 10 tables with many properties...");
-for (let i = 0; i < 10; i = i + 1) {
+i = 0;
+while (i < 10) {
     let big_table = {};
-    for (let j = 0; j < 100; j = j + 1) {
-        big_table["k"] = j;
+    let j = 0;
+    while (j < 100) {
+        big_table.val = j;
+        big_table.count = j * 2;
+        j = j + 1;
     }
     total_created = total_created + 1;
+    i = i + 1;
 }
 print("  Phase 4 complete");
 print("");

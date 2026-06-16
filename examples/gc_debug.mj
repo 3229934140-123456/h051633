@@ -1,0 +1,31 @@
+print("=== GC Debug Test ===");
+
+// Test with small numbers first
+let n = 0;
+while (n < 4000) {
+    let t = {};
+    t.a = 1;
+    t.b = 2;
+    t.c = 3;
+    n = n + 1;
+    if (n % 500 == 0) {
+        print("  Created", n, "tables...");
+    }
+}
+print("4000 tables done.");
+
+// Now nested tables
+n = 0;
+while (n < 500) {
+    let outer = {};
+    outer.inner = {};
+    outer.inner.data = {};
+    outer.inner.data.x = 42;
+    n = n + 1;
+    if (n % 100 == 0) {
+        print("  Created", n, "nested tables...");
+    }
+}
+print("500 nested tables done.");
+
+print("=== Debug Test Complete ===");

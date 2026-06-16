@@ -1,0 +1,48 @@
+print("=== GC Debug Test 5 - Confirm GC is the cause ===");
+print("");
+
+// Phase 1: Create 3000 simple tables first
+print("[Phase 1] Creating 3000 small tables...");
+let total_created = 0;
+let i = 0;
+while (i < 3000) {
+    let t = {};
+    t.a = 1;
+    t.b = 2;
+    t.c = 3;
+    total_created = total_created + 1;
+    i = i + 1;
+}
+print("  Phase 1 complete");
+print("");
+
+// Phase 2: Create 440 nested tables first (should pass)
+print("[Phase 2a] Creating 440 nested tables...");
+i = 0;
+while (i < 440) {
+    let outer = {};
+    outer.inner = {};
+    outer.inner.data = {};
+    outer.inner.data.x = 42;
+    total_created = total_created + 1;
+    i = i + 1;
+}
+print("  Phase 2a complete - 440 nested tables created");
+print("");
+
+// Now, we're at the edge. The next batch will crash.
+// Let's create exactly one more and see if it crashes.
+print("[Phase 2b] Creating 1 more nested table...");
+let outer = {};
+print("  outer created");
+outer.inner = {};
+print("  outer.inner set");
+outer.inner.data = {};
+print("  outer.inner.data set");
+outer.inner.data.x = 42;
+print("  outer.inner.data.x set");
+print("  Phase 2b complete - 1 more nested table created");
+print("");
+
+print("=== Test Complete ===");
+print("Total created:", total_created + 1);

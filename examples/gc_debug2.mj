@@ -1,0 +1,40 @@
+print("=== GC Debug Test 2 ===");
+print("");
+
+// Test 1: Simple tables (should work)
+print("[Test 1] Creating 4000 simple tables...");
+let n = 0;
+while (n < 4000) {
+    let t = {};
+    t.a = 1;
+    t.b = 2;
+    t.c = 3;
+    n = n + 1;
+}
+print("  Test 1 passed - 4000 simple tables created");
+print("");
+
+// Test 2: Nested tables - one at a time with progress
+print("[Test 2] Creating nested tables one by one...");
+n = 0;
+while (n < 500) {
+    // Print every 50 to see progress without too much output
+    if (n % 50 == 0) {
+        print("  Created", n, "nested tables...");
+    }
+
+    let outer = {};
+    outer.inner = {};
+    outer.inner.data = {};
+    outer.inner.data.x = 42;
+
+    // Verify the values
+    assert(outer.inner.data.x == 42);
+
+    n = n + 1;
+}
+print("  Created 500 nested tables...");
+print("  Test 2 passed - 500 nested tables created");
+print("");
+
+print("=== All Tests Passed ===");

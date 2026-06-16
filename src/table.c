@@ -51,7 +51,33 @@ bool table_get(Table* table, ObjString* key, Value* value) {
 }
 
 static void adjust_capacity(Table* table, int capacity) {
+    // Count how many entries we need to protect
+    int protect_count = 0;
+    for (int i = 0; i < table->capacity; i++) {
+        if (table->entries[i].key != NULL) {
+            protect_count += 2;  // key + value
+        }
+    }
+
+    // Push all keys and values to VM stack to protect them from GC
+    int pushed = 0;
+    for (int i = 0; i < table->capacity; i++) {
+        TableEntry* entry = &table->entries[i];
+        if (entry->key != NULL) {
+            vm_push(OBJ_VAL(entry->key));
+            vm_push(entry->value);
+            pushed += 2;
+        }
+    }
+
+    // Now safe to allocate (may trigger GC)
     TableEntry* entries = ALLOCATE(TableEntry, capacity);
+
+    // Pop the protected values
+    for (int i = 0; i < pushed; i++) {
+        vm_pop();
+    }
+
     for (int i = 0; i < capacity; i++) {
         entries[i].key = NULL;
         entries[i].value = NIL_VAL;
@@ -76,7 +102,11 @@ static void adjust_capacity(Table* table, int capacity) {
 bool table_set(Table* table, ObjString* key, Value value) {
     if (table->count + 1 > table->capacity * TABLE_MAX_LOAD) {
         int capacity = MJ_GROW_CAPACITY(table->capacity);
+        // Protect key from GC during reallocation
+        Value key_val = OBJ_VAL(key);
+        vm_push(key_val);
         adjust_capacity(table, capacity);
+        vm_pop();
     }
 
     TableEntry* entry = find_entry(table->entries, table->capacity, key);

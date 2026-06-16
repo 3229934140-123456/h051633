@@ -90,7 +90,9 @@ void gc_blacken_object(Obj* object) {
 
         case OBJ_CLOSURE: {
             ObjClosure* closure = (ObjClosure*)object;
-            gc_mark_object(&closure->function->obj);
+            if (closure->function != NULL) {
+                gc_mark_object(&closure->function->obj);
+            }
             for (int i = 0; i < closure->upvalue_count; i++) {
                 if (closure->upvalues[i] != NULL) {
                     gc_mark_object(&closure->upvalues[i]->obj);
@@ -213,6 +215,11 @@ void* gc_reallocate(void* ptr, size_t old_size, size_t new_size) {
     if (vm.max_memory > 0 && new_size > old_size) {
         size_t delta = new_size - old_size;
         if (vm.bytes_allocated + delta > vm.max_memory) {
+            // Out of memory - set error state
+            if (vm.error_message == NULL) {
+                vm.error_message = "Out of memory: allocation exceeds memory limit.";
+                vm.error_line = 0;
+            }
             return NULL;
         }
     }
@@ -232,6 +239,11 @@ void* gc_reallocate(void* ptr, size_t old_size, size_t new_size) {
 
     void* result = realloc(ptr, new_size);
     if (result == NULL) {
+        // Allocation failed from system
+        if (vm.error_message == NULL) {
+            vm.error_message = "Out of memory: system allocation failed.";
+            vm.error_line = 0;
+        }
         return NULL;
     }
     return result;
