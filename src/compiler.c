@@ -6,6 +6,7 @@
 #include "lexer.h"
 #include "vm.h"
 #include "object.h"
+#include "gc.h"
 
 #ifdef DEBUG_PRINT_CODE
 #include "debug.h"
@@ -243,6 +244,7 @@ static void statement();
 static void expression();
 static ParseRule* get_rule(TokenType type);
 static void parse_precedence(Precedence precedence);
+static void compile_function(FunctionType type);
 
 static u8 identifier_constant(Token* name) {
     return make_constant(OBJ_VAL(copy_string(name->start, name->length)));
@@ -514,6 +516,11 @@ static void typeof_(bool can_assign) {
     emit_byte(OP_TYPEOF);
 }
 
+static void fn_expr(bool can_assign) {
+    MJ_UNUSED(can_assign);
+    compile_function(TYPE_FUNCTION);
+}
+
 static void length_expr(bool can_assign) {
     parse_precedence(PREC_CALL);
     emit_byte(OP_LENGTH);
@@ -594,7 +601,7 @@ ParseRule rules[] = {
     [TOKEN_AND]           = {NULL,     and_,   PREC_AND},
     [TOKEN_ELSE]          = {NULL,     NULL,   PREC_NONE},
     [TOKEN_FALSE]         = {literal,  NULL,   PREC_NONE},
-    [TOKEN_FN]            = {NULL,     NULL,   PREC_NONE},
+    [TOKEN_FN]            = {fn_expr,  NULL,   PREC_NONE},
     [TOKEN_FOR]           = {NULL,     NULL,   PREC_NONE},
     [TOKEN_IF]            = {NULL,     NULL,   PREC_NONE},
     [TOKEN_NIL]           = {literal,  NULL,   PREC_NONE},
@@ -648,7 +655,7 @@ static void block() {
     consume(TOKEN_RIGHT_BRACE, "Expect '}' after block.");
 }
 
-static void function(FunctionType type) {
+static void compile_function(FunctionType type) {
     Compiler compiler;
     init_compiler(&compiler, type);
     begin_scope();
@@ -681,7 +688,7 @@ static void function(FunctionType type) {
 static void fun_declaration() {
     u8 global = parse_variable("Expect function name.");
     mark_initialized();
-    function(TYPE_FUNCTION);
+    compile_function(TYPE_FUNCTION);
     define_variable(global);
 }
 

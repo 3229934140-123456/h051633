@@ -238,9 +238,9 @@ void mj_new_table(MjState* state) {
 
 void mj_set_table(MjState* state, int table_index) {
     MJ_UNUSED(state);
+    Value table_val = *index_to_addr(state, table_index);
     Value value = vm_pop();
     Value key = vm_pop();
-    Value table_val = *index_to_addr(state, table_index);
     if (IS_TABLE(table_val) && IS_STRING(key)) {
         table_set(&AS_TABLE(table_val)->table, AS_STRING(key), value);
     }
@@ -248,8 +248,8 @@ void mj_set_table(MjState* state, int table_index) {
 
 void mj_get_table(MjState* state, int table_index) {
     MJ_UNUSED(state);
-    Value key = vm_pop();
     Value table_val = *index_to_addr(state, table_index);
+    Value key = vm_pop();
     if (IS_TABLE(table_val) && IS_STRING(key)) {
         Value value;
         if (table_get(&AS_TABLE(table_val)->table, AS_STRING(key), &value)) {

@@ -12,6 +12,8 @@
 
 VM vm;
 
+static InterpretResult run(int target_frames);
+
 static Value print_native(int arg_count, Value* args) {
     for (int i = 0; i < arg_count; i++) {
         if (i > 0) printf(" ");
@@ -202,7 +204,7 @@ void vm_runtime_error(const char* format, ...) {
     va_end(args);
 
     int len = strlen(buf);
-    vm.error_message = REALLOC(vm.error_message, char, 0, len + 1);
+    vm.error_message = REALLOC(char, vm.error_message, 0, len + 1);
     memcpy(vm.error_message, buf, len + 1);
 
     if (vm.frame_count > 0) {
@@ -288,7 +290,7 @@ static InterpretResult run(int target_frames) {
             case OP_GET_GLOBAL: {
                 ObjString* name = READ_STRING();
                 Value value;
-                if (!table_get(vm.globals, name, &value)) {
+                if (!table_get(&vm.globals, name, &value)) {
                     vm_runtime_error("Undefined variable '%s'.", name->chars);
                     return RESULT_RUNTIME_ERROR;
                 }
@@ -297,14 +299,14 @@ static InterpretResult run(int target_frames) {
             }
             case OP_DEFINE_GLOBAL: {
                 ObjString* name = READ_STRING();
-                table_set(vm.globals, name, vm_peek(0));
+                table_set(&vm.globals, name, vm_peek(0));
                 vm_pop();
                 break;
             }
             case OP_SET_GLOBAL: {
                 ObjString* name = READ_STRING();
-                if (table_set(vm.globals, name, vm_peek(0))) {
-                    table_delete(vm.globals, name);
+                if (table_set(&vm.globals, name, vm_peek(0))) {
+                    table_delete(&vm.globals, name);
                     vm_runtime_error("Undefined variable '%s'.", name->chars);
                     return RESULT_RUNTIME_ERROR;
                 }
@@ -546,7 +548,7 @@ static InterpretResult run(int target_frames) {
 void vm_define_native(const char* name, NativeFn function, int arity) {
     vm_push(OBJ_VAL(copy_string(name, (int)strlen(name))));
     vm_push(OBJ_VAL(new_native(function, arity, name)));
-    table_set(vm.globals, AS_STRING(vm.stack[0]), vm.stack[1]);
+    table_set(&vm.globals, AS_STRING(vm.stack[0]), vm.stack[1]);
     vm_pop();
     vm_pop();
 }

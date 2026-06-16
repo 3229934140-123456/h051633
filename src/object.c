@@ -6,6 +6,7 @@
 #include "memory.h"
 #include "vm.h"
 #include "table.h"
+#include "gc.h"
 
 #define ALLOCATE_OBJ(type, object_type) \
     (type*)allocate_object(sizeof(type), object_type)
@@ -40,13 +41,13 @@ static ObjString* allocate_string(char* chars, int length, u32 hash) {
     string->chars = chars;
     string->hash = hash;
 
-    table_set(vm.strings, string, NIL_VAL);
+    table_set(&vm.strings, string, NIL_VAL);
     return string;
 }
 
 ObjString* take_string(char* chars, int length) {
     u32 hash = hash_string(chars, length);
-    ObjString* interned = table_find_string(vm.strings, chars, length, hash);
+    ObjString* interned = table_find_string(&vm.strings, chars, length, hash);
     if (interned != NULL) {
         FREE_ARRAY(char, chars, length + 1);
         return interned;
@@ -56,7 +57,7 @@ ObjString* take_string(char* chars, int length) {
 
 ObjString* copy_string(const char* chars, int length) {
     u32 hash = hash_string(chars, length);
-    ObjString* interned = table_find_string(vm.strings, chars, length, hash);
+    ObjString* interned = table_find_string(&vm.strings, chars, length, hash);
     if (interned != NULL) return interned;
 
     char* heap_chars = ALLOCATE(char, length + 1);

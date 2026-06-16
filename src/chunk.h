@@ -41,8 +41,6 @@ typedef enum {
     OP_CLOSE_UPVALUE,
     OP_RETURN,
     OP_NEW_TABLE,
-    OP_NEW_ARRAY,
-    OP_PUSH_ARRAY,
     OP_LENGTH,
     OP_TYPEOF,
     OP_ASSERT

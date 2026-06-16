@@ -16,12 +16,31 @@ static void repl() {
         }
 
         InterpretResult result = vm_interpret(line);
-        if (result == RESULT_COMPILE_ERROR) {
-            fprintf(stderr, "Compile error\n");
-        } else if (result == RESULT_RUNTIME_ERROR) {
-            fprintf(stderr, "Runtime error: %s (line %d)\n",
-                    vm.error_message ? vm.error_message : "unknown",
-                    vm.error_line);
+        if (result != RESULT_OK) {
+            fprintf(stderr, "Error: ");
+            switch (result) {
+                case RESULT_COMPILE_ERROR:
+                    fprintf(stderr, "Compile error");
+                    break;
+                case RESULT_RUNTIME_ERROR:
+                    fprintf(stderr, "Runtime error: %s (line %d)",
+                            vm.error_message ? vm.error_message : "unknown",
+                            vm.error_line);
+                    break;
+                case RESULT_OUT_OF_MEMORY:
+                    fprintf(stderr, "Out of memory");
+                    break;
+                case RESULT_STACK_OVERFLOW:
+                    fprintf(stderr, "Stack overflow");
+                    break;
+                case RESULT_TIMEOUT:
+                    fprintf(stderr, "Execution timeout (too many steps)");
+                    break;
+                default:
+                    fprintf(stderr, "Unknown error (code %d)", result);
+                    break;
+            }
+            fprintf(stderr, "\n");
         }
     }
 }
@@ -59,12 +78,34 @@ static void run_file(const char* path) {
     InterpretResult result = vm_interpret(source);
     free(source);
 
-    if (result == RESULT_COMPILE_ERROR) exit(65);
-    if (result == RESULT_RUNTIME_ERROR) exit(70);
+    switch (result) {
+        case RESULT_OK:
+            break;
+        case RESULT_COMPILE_ERROR:
+            fprintf(stderr, "Compile error.\n");
+            exit(65);
+        case RESULT_RUNTIME_ERROR:
+            fprintf(stderr, "Runtime error: %s (line %d)\n",
+                    vm.error_message ? vm.error_message : "unknown",
+                    vm.error_line);
+            exit(70);
+        case RESULT_OUT_OF_MEMORY:
+            fprintf(stderr, "Out of memory.\n");
+            exit(71);
+        case RESULT_STACK_OVERFLOW:
+            fprintf(stderr, "Stack overflow.\n");
+            exit(72);
+        case RESULT_TIMEOUT:
+            fprintf(stderr, "Execution timeout: script exceeded maximum steps.\n");
+            exit(73);
+    }
 }
 
 int main(int argc, const char* argv[]) {
     vm_init();
+
+    vm.max_execution_steps = 10000000;
+    vm.max_memory = 64 * 1024 * 1024;
 
     if (argc == 1) {
         repl();

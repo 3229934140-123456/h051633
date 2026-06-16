@@ -156,7 +156,7 @@ static TokenType identifier_type(Lexer* lexer) {
             break;
         case 'l':
             if (length >= 2 && start[1] == 'e') {
-                if (length == 3) return TOKEN_LET;
+                if (length == 3 && memcmp(start + 2, "t", 1) == 0) return TOKEN_LET;
                 if (length == 6 && memcmp(start + 2, "ngth", 4) == 0) return TOKEN_LENGTH;
             }
             break;

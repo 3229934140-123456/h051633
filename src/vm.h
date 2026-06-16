@@ -62,7 +62,7 @@ void vm_init();
 void vm_free();
 
 InterpretResult vm_interpret(const char* source);
-InterpretResult vm_call_function(ObjClosure* closure, int arg_count);
+bool vm_call_function(ObjClosure* closure, int arg_count);
 InterpretResult vm_call(int arg_count);
 
 void vm_push(Value value);

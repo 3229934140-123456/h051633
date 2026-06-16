@@ -22,10 +22,38 @@ typedef struct {
     } as;
 } Value;
 
-#define NIL_VAL         ((Value){VAL_NIL, {.number = 0}})
-#define BOOL_VAL(value) ((Value){VAL_BOOL, {.boolean = value}})
-#define NUMBER_VAL(num) ((Value){VAL_NUMBER, {.number = (num)}})
-#define OBJ_VAL(obj)    ((Value){VAL_OBJ, {.obj = (Obj*)obj}})
+#define NIL_VAL         make_nil_val()
+#define BOOL_VAL(value) make_bool_val(value)
+#define NUMBER_VAL(num) make_number_val(num)
+#define OBJ_VAL(obj)    make_obj_val((Obj*)obj)
+
+static inline Value make_nil_val(void) {
+    Value v;
+    v.type = VAL_NIL;
+    v.as.number = 0;
+    return v;
+}
+
+static inline Value make_bool_val(bool b) {
+    Value v;
+    v.type = VAL_BOOL;
+    v.as.boolean = b;
+    return v;
+}
+
+static inline Value make_number_val(double n) {
+    Value v;
+    v.type = VAL_NUMBER;
+    v.as.number = n;
+    return v;
+}
+
+static inline Value make_obj_val(Obj* o) {
+    Value v;
+    v.type = VAL_OBJ;
+    v.as.obj = o;
+    return v;
+}
 
 #define IS_NIL(value)     ((value).type == VAL_NIL)
 #define IS_BOOL(value)    ((value).type == VAL_BOOL)
