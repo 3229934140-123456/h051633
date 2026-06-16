@@ -13,6 +13,7 @@
 
 static Obj* allocate_object(size_t size, ObjType type) {
     Obj* object = (Obj*)mj_reallocate(NULL, 0, size);
+    if (object == NULL) return NULL;
     object->type = type;
     object->is_marked = false;
     object->size = size;
@@ -20,7 +21,11 @@ static Obj* allocate_object(size_t size, ObjType type) {
     vm.objects = object;
 
     if (vm.bytes_allocated > vm.next_gc && vm.gc_enabled) {
+        gc_mark_object(object);
+        Value temp = OBJ_VAL(object);
+        vm_push(temp);
         gc_collect();
+        vm_pop();
     }
 
     return object;

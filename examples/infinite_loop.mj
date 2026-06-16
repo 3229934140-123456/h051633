@@ -1,0 +1,11 @@
+print("=== Step Limit Test: Infinite Loop ===");
+print("This loop will be interrupted by the step limit (10,000,000 steps by default).");
+print("");
+
+let x = 0;
+while (true) {
+    x = x + 1;
+    if (x % 1000000 == 0) {
+        print("Still running... x =", x);
+    }
+}

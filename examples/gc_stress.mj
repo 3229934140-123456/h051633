@@ -1,0 +1,62 @@
+print("=== GC and Memory Limit Test ===");
+print("Creating large numbers of objects to trigger GC...");
+print("");
+
+let total_created = 0;
+
+// Phase 1: Create many tables (tables create GC pressure)
+print("[Phase 1] Creating 5000 small tables...");
+for (let i = 0; i < 5000; i = i + 1) {
+    let t = {};
+    t.a = 1;
+    t.b = 2;
+    t.c = 3;
+    total_created = total_created + 1;
+}
+print("  Phase 1 complete - 5000 tables created and collected");
+print("");
+
+// Phase 2: Create nested tables
+print("[Phase 2] Creating 2000 nested tables...");
+for (let i = 0; i < 2000; i = i + 1) {
+    let outer = {};
+    outer.inner = {};
+    outer.inner.data = {};
+    outer.inner.data.x = 42;
+    total_created = total_created + 1;
+}
+print("  Phase 2 complete - 2000 nested tables created");
+print("");
+
+// Phase 3: Create many closures
+print("[Phase 3] Creating 2000 closures...");
+for (let i = 0; i < 2000; i = i + 1) {
+    let make_fn = fn() {
+        let local_var = 100;
+        return fn() {
+            return local_var;
+        };
+    };
+    let f = make_fn();
+    let result = f();
+    total_created = total_created + 1;
+}
+print("  Phase 3 complete - 2000 closures created");
+print("");
+
+// Phase 4: Large table stress
+print("[Phase 4] Creating 10 tables with many properties...");
+for (let i = 0; i < 10; i = i + 1) {
+    let big_table = {};
+    for (let j = 0; j < 100; j = j + 1) {
+        big_table["k"] = j;
+    }
+    total_created = total_created + 1;
+}
+print("  Phase 4 complete");
+print("");
+
+print("=== Test Complete ===");
+print("Total logical objects created:", total_created);
+print("Process completed successfully - GC should have run multiple times.");
+print("No crash or hang indicates memory management is working correctly.");

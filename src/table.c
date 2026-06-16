@@ -5,6 +5,7 @@
 #include "memory.h"
 #include "object.h"
 #include "gc.h"
+#include "vm.h"
 
 #define TABLE_MAX_LOAD 0.75
 

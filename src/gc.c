@@ -50,7 +50,9 @@ static void mark_roots() {
     }
 
     for (int i = 0; i < vm.frame_count; i++) {
-        gc_mark_object(&vm.frames[i].closure->obj);
+        if (vm.frames[i].closure != NULL) {
+            gc_mark_object(&vm.frames[i].closure->obj);
+        }
     }
 
     for (ObjUpvalue* upvalue = vm.open_upvalues;
@@ -78,7 +80,9 @@ void gc_blacken_object(Obj* object) {
 
         case OBJ_FUNCTION: {
             ObjFunction* function = (ObjFunction*)object;
-            gc_mark_object(&function->name->obj);
+            if (function->name != NULL) {
+                gc_mark_object(&function->name->obj);
+            }
             gc_mark_array(function->chunk.constants.data,
                           function->chunk.constants.count);
             break;
@@ -88,7 +92,9 @@ void gc_blacken_object(Obj* object) {
             ObjClosure* closure = (ObjClosure*)object;
             gc_mark_object(&closure->function->obj);
             for (int i = 0; i < closure->upvalue_count; i++) {
-                gc_mark_object(&closure->upvalues[i]->obj);
+                if (closure->upvalues[i] != NULL) {
+                    gc_mark_object(&closure->upvalues[i]->obj);
+                }
             }
             break;
         }

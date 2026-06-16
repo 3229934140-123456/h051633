@@ -1,8 +1,0 @@
-print("Testing infinite loop with step limit...");
-let x = 0;
-while (true) {
-    x = x + 1;
-    if (x % 100000 == 0) {
-        print("x =", x);
-    }
-}
