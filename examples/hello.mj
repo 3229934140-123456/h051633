@@ -1,0 +1,122 @@
+// Moonjit 示例脚本：综合测试
+// ========================================
+
+// 1. 基础算术与变量
+print("=== 基础算术与变量 ===");
+let x = 10;
+let y = 20;
+print("x + y =", x + y);
+print("x * y =", x * y);
+print("x / y =", x / y);
+print("x % 3 =", x % 3);
+
+// 2. 字符串操作
+print("\n=== 字符串操作 ===");
+let name = "Moonjit";
+print("Hello, " + name + "!");
+print("length of name:", length name);
+print("typeof name:", typeof name);
+
+// 3. 条件语句
+print("\n=== 条件语句 ===");
+let age = 18;
+if (age >= 18) {
+    print("Adult");
+} else {
+    print("Minor");
+}
+
+// 4. 循环
+print("\n=== 循环 ===");
+print("while loop:");
+let i = 1;
+while (i <= 5) {
+    print("  i =", i);
+    i = i + 1;
+}
+
+print("for loop sum:");
+let sum = 0;
+for (let j = 1; j <= 100; j = j + 1) {
+    sum = sum + j;
+}
+print("  sum 1-100 =", sum);
+
+// 5. 递归函数
+print("\n=== 递归函数 ===");
+fn fib(n) {
+    if (n < 2) {
+        return n;
+    }
+    return fib(n - 1) + fib(n - 2);
+}
+print("fib(10) =", fib(10));
+
+// 6. 闭包与上值捕获
+print("\n=== 闭包与上值捕获 ===");
+fn make_counter(start) {
+    let count = start;
+    fn increment() {
+        count = count + 1;
+        return count;
+    }
+    fn decrement() {
+        count = count - 1;
+        return count;
+    }
+    fn get() {
+        return count;
+    }
+    return {
+        inc: increment,
+        dec: decrement,
+        get: get
+    };
+}
+
+let counter = make_counter(10);
+print("initial:", counter.get());
+print("inc:", counter.inc());
+print("inc:", counter.inc());
+print("dec:", counter.dec());
+print("get:", counter.get());
+
+// 7. 表与属性
+print("\n=== 表与属性 ===");
+let point = {
+    x: 3,
+    y: 4
+};
+print("point:", point.x, ",", point.y);
+point.z = 5;
+print("point.z:", point.z);
+
+// 8. 表索引访问
+print("\n=== 表索引访问 ===");
+let dict = {};
+dict["name"] = "test";
+dict["value"] = 42;
+print("dict['name']:", dict["name"]);
+print("dict['value']:", dict["value"]);
+print("length of dict:", length dict);
+
+// 9. 原生函数调用
+print("\n=== 原生函数 ===");
+print("type of 42:", type(42));
+print("type of 'hello':", type("hello"));
+print("len of 'world':", len("world"));
+
+// 10. 断言
+print("\n=== 断言测试 ===");
+assert(1 + 1 == 2);
+print("assert passed: 1+1 == 2");
+
+// 11. 类型检测
+print("\n=== 类型检测 ===");
+print("typeof 42:", typeof 42);
+print("typeof true:", typeof true);
+print("typeof nil:", typeof nil);
+print("typeof {}:", typeof {});
+print("typeof fn() {}", typeof fn() {});
+
+print("\n=== 所有测试完成 ===");
